@@ -29,12 +29,17 @@ def getData(url, function, symbol, apiKey):
 
 def handleData(inputData):
 
+        outputData = pd.DataFrame(columns = ['Date', 'Open', 'Close', 'High', 'Low'])
+
         for key in inputData:
                 open = dailyData[key]["1. open"]
                 high = dailyData[key]["2. high"]
                 low = dailyData[key]["3. low"]
                 close = dailyData[key]["4. close"]
-                
+
+                outputData = outputData.append({'Date': key, 'Open' : open, 'High' : high, 'Low' : low, 'Close' : close}, ignore_index = True) 
+
+        return(outputData)
 
 
 rawData = getData(url, function, symbol, apiKey)
@@ -44,13 +49,17 @@ jsonData = json.loads(rawData.content)
 
 dailyData = jsonData['Time Series (Daily)']
 
+#print(dailyData)
+
 columns = ['Date', 'Open', 'Close', 'High', 'Low']
 index = dailyData.keys()
 
 df = pd.DataFrame(index = index, columns = columns)
 df = df.fillna(0)
 
-print(df)
+#print(df)
 
-handleData(dailyData)
-
+dataFrame = handleData(dailyData)
+dataFrame['Date'] = pd.to_datetime(dataFrame['Date'])
+dataFrame = dataFrame.set_index('Date')
+print(dataFrame)
